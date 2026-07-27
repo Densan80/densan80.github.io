@@ -1,1 +1,117 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Справочник сварных швов по ГОСТ 5264-80</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-container">
+    <header class="app-header">
+      <div class="logo-area">
+        <span class="icon">⚙️</span>
+        <h1>Справочник по ГОСТ 5264-80 (РД)</h1>
+      </div>
+      <p class="subtitle">Инженерный помощник для подбора типов сварных соединений и конструктивных элементов</p>
+    </header>
 
+    <main class="main-layout">
+      <!-- Панель управления -->
+      <section class="control-panel card">
+        <h2>1. Параметры поиска</h2>
+        
+        <div class="form-group">
+          <label for="thicknessRange">Толщина свариваемых деталей $S$ (мм):</label>
+          <div class="range-wrapper">
+            <input type="range" id="thicknessRange" min="1" max="30" value="6" step="0.5">
+            <input type="number" id="thicknessInput" min="1" max="60" value="6" step="0.5">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="jointTypeSelect">Тип соединения:</label>
+          <select id="jointTypeSelect">
+            <option value="ALL">Все типы (Стыковые, Тавровые, Нахлесточные, Угловые)</option>
+            <option value="C">Стыковые (С)</option>
+            <option value="T">Тавровые (Т)</option>
+            <option value="N">Нахлесточные (Н)</option>
+            <option value="U">Угловые (У)</option>
+          </select>
+        </div>
+
+        <div class="results-selector">
+          <h3>Подходящие швы (<span id="matchCount">0</span>):</h3>
+          <div id="jointsList" class="joints-chips-container">
+            <!-- Кнопки швов подгружаются JS -->
+          </div>
+        </div>
+      </section>
+
+      <!-- Панель детальной информации -->
+      <section class="details-panel card">
+        <h2>2. Характеристики и разделка кромок</h2>
+        
+        <div id="emptyState" class="empty-state hidden">
+          <p>Выберите шов из списка слева для просмотра подробной информации.</p>
+        </div>
+
+        <div id="weldDetails" class="weld-details">
+          <div class="detail-header">
+            <div>
+              <span id="weldCodeBadge" class="badge">С8</span>
+              <h3 id="weldName">Стыковое с V-образным скосом кромок</h3>
+            </div>
+            <div class="eskd-box">
+              <span class="eskd-label">Обозначение ЕСКД:</span>
+              <div class="eskd-code-wrapper">
+                <code id="eskdCode">ГОСТ 5264-80-С8</code>
+                <button id="copyBtn" class="btn-copy" title="Скопировать в буфер">📋 Копировать</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Схема кромок -->
+          <div class="scheme-container">
+            <div class="scheme-title">Конструктивные элементы и подготовка кромок (Разрез)</div>
+            <div id="svgContainer" class="svg-wrapper">
+              <!-- SVG генерируется скриптом -->
+            </div>
+          </div>
+
+          <!-- Таблица параметров -->
+          <div class="params-grid">
+            <div class="param-box">
+              <span class="param-label">Диапазон толщин ($S$)</span>
+              <span id="paramS" class="param-value">3 – 26 мм</span>
+            </div>
+            <div class="param-box">
+              <span class="param-label">Зазор ($b$)</span>
+              <span id="paramB" class="param-value">1 – 3 мм</span>
+            </div>
+            <div class="param-box">
+              <span class="param-label">Угол скоса ($lpha$)</span>
+              <span id="paramAlpha" class="param-value">60° ± 5°</span>
+            </div>
+            <div class="param-box">
+              <span class="param-label">Притупление ($c$)</span>
+              <span id="paramC" class="param-value">1 – 2 мм</span>
+            </div>
+          </div>
+
+          <div class="description-box">
+            <h4>Технологическая примечание:</h4>
+            <p id="weldDesc">Описание и области применения соединения.</p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="app-footer">
+      <p>Интерактивный справочник сварных соединений по ГОСТ 5264-80 • Для инженеров-конструкторов</p>
+    </footer>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
