@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Справочник конструктора · Сварные швы по ГОСТ</title>
+<style>
+  :root{
+    --bg: #122436;
+    --bg-deep: #0c1a27;
+    --panel: #17324a;
+    --panel-2: #1c3c58;
+    --grid: rgba(127,179,213,0.14);
+    --grid-strong: rgba(127,179,213,0.28);
+    --line: #6FB7D9;
+    --text: #E7F1F7;
+    --text-muted: #8FA9BC;
+    --accent: #C1443A;
+    --accent-soft: rgba(193,68,58,0.16);
+    --mono: 'IBM Plex Mono','SFMono-Regular','Consolas','Menlo',monospace;
+    --sans: 'IBM Plex Sans','Inter','Segoe UI',Arial,sans-serif;
+    --cond: 'Oswald','Arial Narrow','Helvetica Neue',Arial,sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      linear-gradient(var(--grid) 1px, transparent 1px) 0 0/28px 28px,
+      linear-gradient(90deg, var(--grid) 1px, transparent 1px) 0 0/28px 28px,
+      radial-gradient(ellipse at 20% -10%, #1a3550 0%, var(--bg) 55%);
+    background-color: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    min-height: 100vh;
+    padding: 20px 20px 60px;
+  }
+
+  /* ---------- Title block ---------- */
+  .titleblock{
+    max-width: 1180px; margin: 0 auto 22px;
+    border: 1px solid var(--grid-strong);
+    background: var(--panel);
+    display:grid;
+    grid-template-columns: 1fr auto;
+    position:relative;
+  }
+  .titleblock::before{
+    content:"";
+    position:absolute; inset:6px;
+    border:1px solid var(--grid-strong);
+    pointer-events:none;
+  }
+  .tb-main{ padding:22px 26px 18px; }
+  .tb-eyebrow{
+    font-family: var(--mono); font-size:11px; letter-spacing:.18em;
+    color: var(--line); text-transform:uppercase; margin-bottom:8px;
+  }
+  .tb-title{
+    font-family: var(--cond); font-weight:600; text-transform:uppercase;
+    font-size: clamp(26px,4vw,40px); letter-spacing:.03em; margin:0 0 6px;
+    line-height:1.05;
+  }
+  .tb-sub{ color:var(--text-muted); font-size:14.5px; max-width:640px; line-height:1.5;}
+  .tb-stamp{
+    align-self:end; justify-self:end;
+    margin: 0 26px 18px 0;
+    border:1px solid var(--grid-strong);
+    padding:10px 14px; font-family:var(--mono); font-size:11px; color:var(--line);
+    display:grid; grid-template-columns:auto auto; gap:3px 14px; white-space:nowrap;
+  }
+  .tb-stamp b{ color:var(--text); font-weight:600;}
+  @media (max-width:760px){
+    .titleblock{grid-template-columns:1fr;}
+    .tb-stamp{justify-self:start; margin:0 26px 20px;}
+  }
+
+  /* ---------- Layout shell ---------- */
+  .shell{ max-width:1180px; margin:0 auto; }
+
+  /* ---------- Search ---------- */
+  .searchbar{
+    display:flex; gap:10px; align-items:center;
+    background:var(--panel); border:1px solid var(--grid-strong);
+    padding:12px 16px; margin-bottom:16px;
+  }
+  .searchbar .tag{
+    font-family:var(--mono); font-size:11px; color:var(--line);
+    border:1px solid var(--grid-strong); padding:3px 8px; letter-spacing:.06em;
+  }
+  .searchbar input{
+    flex:1; background:transparent; border:none; outline:none;
+    color:var(--text); font-family:var(--mono); font-size:15px;
+    padding:6px 4px;
+  }
+  .searchbar input::placeholder{ color:var(--text-muted); }
+  .search-count{ font-family:var(--mono); font-size:12px; color:var(--text-muted); white-space:nowrap;}
+
+  /* ---------- Tabs ---------- */
+  .tabs{
+    display:flex; flex-wrap:wrap; gap:2px; margin-bottom:18px;
+    border-bottom:1px solid var(--grid-strong);
+  }
+  .tab{
+    font-family:var(--cond); text-transform:uppercase; letter-spacing:.04em;
+    font-size:14px; color:var(--text-muted); background:var(--panel);
+    border:1px solid var(--grid-strong); border-bottom:none;
+    padding:10px 16px; cursor:pointer; transition:.15s;
+  }
+  .tab:hover{ color:var(--text); }
+  .tab.active{ color:var(--bg); background:var(--line); border-color:var(--line); }
+
+  .view{ display:none; }
+  .view.active{ display:block; }
+
+  /* ---------- Section heading ---------- */
+  .sec-head{ display:flex; align-items:baseline; gap:14px; margin: 26px 0 14px; }
+  .sec-head .num{ font-family:var(--mono); color:var(--accent); font-size:13px; }
+  .sec-head h2{
+    font-family:var(--cond); text-transform:uppercase; letter-spacing:.03em;
+    font-size:20px; margin:0; font-weight:600;
+  }
+  .sec-head .line{ flex:1; height:1px; background:var(--grid-strong); }
+  .sec-note{ color:var(--text-muted); font-size:13.5px; line-height:1.6; margin: 0 0 16px; max-width:820px;}
+
+  /* ---------- Cards grid ---------- */
+  .grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:12px; }
+  .card{
+    background:var(--panel); border:1px solid var(--grid-strong);
+    padding:14px 16px 16px; position:relative;
+  }
+  .card .code-row{ display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;}
+  .card .code{
+    font-family:var(--mono); font-size:16px; color:var(--line); letter-spacing:.02em;
+  }
+  .card .badge{
+    font-family:var(--mono); font-size:10px; color:var(--text-muted);
+    border:1px solid var(--grid-strong); padding:2px 6px; text-transform:uppercase;
+  }
+  .card .icon{ display:block; margin:6px 0 10px; opacity:.92; }
+  .card .prep{ font-size:14px; line-height:1.5; margin:0 0 8px; }
+  .card .meta{ display:flex; flex-wrap:wrap; gap:6px 14px; font-size:12px; color:var(--text-muted); font-family:var(--mono); }
+  .card .meta span b{ color:var(--text); font-weight:600; }
+  .card .verify{
+    margin-top:10px; font-size:11.5px; color:var(--accent); border-top:1px dashed var(--grid-strong);
+    padding-top:8px; line-height:1.4;
+  }
+
+  /* ---------- Glossary ---------- */
+  .gloss{ display:grid; grid-template-columns: 190px 1fr; gap:4px 18px; }
+  .gloss dt{ font-family:var(--mono); color:var(--line); padding:9px 0; border-top:1px solid var(--grid); font-size:13.5px;}
+  .gloss dd{ margin:0; padding:9px 0; border-top:1px solid var(--grid); font-size:13.5px; color:var(--text-muted); line-height:1.55;}
+  @media (max-width:640px){ .gloss{grid-template-columns:1fr;} .gloss dt{border-top:1px solid var(--grid-strong); padding-bottom:0;} .gloss dd{border-top:none; padding-top:2px;} }
+
+  /* ---------- Decision cards ---------- */
+  .decision{ display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:12px; margin-bottom:8px; }
+  .dcard{ background:var(--panel-2); border:1px solid var(--grid-strong); padding:16px; }
+  .dcard .q{ font-size:13.5px; color:var(--text-muted); margin-bottom:8px; line-height:1.45;}
+  .dcard .a{ font-family:var(--mono); color:var(--line); font-size:15px; }
+
+  /* ---------- Symbol rule blocks (2.312) ---------- */
+  .rule{ display:grid; grid-template-columns: 1fr 1.3fr; gap:18px; background:var(--panel); border:1px solid var(--grid-strong); padding:16px; margin-bottom:12px; align-items:center;}
+  .rule .rsvg{ display:flex; align-items:center; justify-content:center; }
+  .rule h3{ font-family:var(--cond); text-transform:uppercase; font-size:15px; margin:0 0 6px; letter-spacing:.03em;}
+  .rule p{ font-size:13.5px; color:var(--text-muted); line-height:1.6; margin:0; }
+  @media (max-width:700px){ .rule{grid-template-columns:1fr;} }
+
+  .footnote{
+    margin-top:36px; border-top:1px solid var(--grid-strong); padding-top:16px;
+    font-size:12.5px; color:var(--text-muted); line-height:1.7; max-width:900px;
+  }
+  .footnote b{ color:var(--accent); }
+
+  ::selection{ background: var(--accent-soft); }
+</style>
+</head>
+<body>
+
+<div class="titleblock">
+  <div class="tb-main">
+    <div class="tb-eyebrow">Справочник инженера-конструктора</div>
+    <h1 class="tb-title">Сварные соединения · ГОСТ</h1>
+    <div class="tb-sub">Классификация типов швов, условные обозначения и правила простановки на чертежах по действующим межгосударственным стандартам.</div>
+  </div>
+  <div class="tb-stamp">
+    <span>ГОСТ 5264-80</span><b>действ.</b>
+    <span>ГОСТ 14771-76</span><b>действ.</b>
+    <span>ГОСТ 16037-80</span><b>действ.</b>
+    <span>ГОСТ 11534-75</span><b>действ.</b>
+  </div>
+</div>
+
+<div class="shell">
+
+  <div class="searchbar">
+    <span class="tag">ПОИСК</span>
+    <input id="search" type="text" placeholder="код шва, тип соединения, толщина, способ сварки…">
+    <span class="search-count" id="count"></span>
+  </div>
+
+  <div class="tabs" id="tabs">
+    <div class="tab active" data-view="overview">Как выбрать ГОСТ</div>
+    <div class="tab" data-view="glossary">Термины и разделка кромок</div>
+    <div class="tab" data-view="g5264">ГОСТ 5264-80</div>
+    <div class="tab" data-view="g14771">ГОСТ 14771-76</div>
+    <div class="tab" data-view="g16037">ГОСТ 16037-80</div>
+    <div class="tab" data-view="g11534">ГОСТ 11534-75</div>
+    <div class="tab" data-view="g2312">Обозначения на чертеже (2.312)</div>
+  </div>
+
+  <!-- OVERVIEW -->
+  <div class="view active" id="view-overview">
+    <div class="sec-head"><span class="num">01</span><h2>Какой ГОСТ применить</h2><span class="line"></span></div>
+    <p class="sec-note">Все четыре стандарта на типы и конструктивные элементы швов дополняют друг друга и не дублируются — область применения у каждого своя.</p>
+    <div class="decision">
+      <div class="dcard"><div class="q">Ручная дуговая сварка плавящимся электродом, обычные стальные конструкции</div><div class="a">ГОСТ 5264-80</div></div>
+      <div class="dcard"><div class="q">Дуговая сварка в защитном газе (инертном, СО₂, смесях) плавящимся или неплавящимся электродом</div><div class="a">ГОСТ 14771-76</div></div>
+      <div class="dcard"><div class="q">Сварные соединения стальных трубопроводов: труба-труба, труба-арматура, врезки, муфты</div><div class="a">ГОСТ 16037-80</div></div>
+      <div class="dcard"><div class="q">Детали расположены не под 90°, а под острым или тупым углом (толщина металла ≤ 60 мм)</div><div class="a">ГОСТ 11534-75</div></div>
+      <div class="dcard"><div class="q">Как проставить шов на чертеже: линия-выноска, полка, знаки</div><div class="a">ГОСТ 2.312</div></div>
+      <div class="dcard"><div class="q">Тонкий металл (0,8–1,4 мм), сварка в СО₂ плавящейся проволокой</div><div class="a">Допускается брать типы по ГОСТ 5264-80 (п.13 ГОСТ 14771-76)</div></div>
+    </div>
+    <div class="sec-head"><span class="num">02</span><h2>Общая логика классификации швов</h2><span class="line"></span></div>
+    <p class="sec-note">Буквенный индекс в обозначении шва (С / У / Т / Н) одинаков для ГОСТ 5264-80, 14771-76 и 11534-75 и определяет геометрию соединения, а не способ сварки:</p>
+    <div class="grid">
+      <div class="card"><div class="code-row"><span class="code">С — стыковое</span></div><svg class="icon" viewBox="0 0 120 70" width="100%" height="70"><g stroke="var(--line)" stroke-width="2" fill="none"><rect x="10" y="20" width="45" height="30"/><rect x="65" y="20" width="45" height="30"/><path d="M55 20 L65 20 M55 50 L65 50" stroke="var(--accent)"/></g></svg><p class="prep">Детали примыкают торцами, оси / поверхности лежат в одной плоскости.</p></div>
+      <div class="card"><div class="code-row"><span class="code">У — угловое</span></div><svg class="icon" viewBox="0 0 120 70" width="100%" height="70"><g stroke="var(--line)" stroke-width="2" fill="none"><path d="M20 55 L20 15 L55 15"/><path d="M55 15 L100 15 L100 55"/><path d="M55 15 L70 30" stroke="var(--accent)"/></g></svg><p class="prep">Кромки деталей расположены под углом друг к другу и свариваются по этой кромке.</p></div>
+      <div class="card"><div class="code-row"><span class="code">Т — тавровое</span></div><svg class="icon" viewBox="0 0 120 70" width="100%" height="70"><g stroke="var(--line)" stroke-width="2" fill="none"><rect x="10" y="45" width="100" height="10"/><rect x="53" y="12" width="14" height="33"/><path d="M53 45 L44 55 M67 45 L76 55" stroke="var(--accent)"/></g></svg><p class="prep">Торец одной детали примыкает под углом (обычно 90°) к поверхности другой.</p></div>
+      <div class="card"><div class="code-row"><span class="code">Н — нахлёсточное</span></div><svg class="icon" viewBox="0 0 120 70" width="100%" height="70"><g stroke="var(--line)" stroke-width="2" fill="none"><rect x="10" y="30" width="70" height="10"/><rect x="45" y="18" width="70" height="10"/><path d="M80 30 L80 40 M45 18 L45 28" stroke="var(--accent)"/></g></svg><p class="prep">Поверхности свариваемых деталей перекрывают друг друга.</p></div>
+    </div>
+  </div>
+
+  <!-- GLOSSARY -->
+  <div class="view" id="view-glossary">
+    <div class="sec-head"><span class="num">03</span><h2>Термины подготовки кромок</h2><span class="line"></span></div>
+    <p class="sec-note">Единый словарь, действующий во всех стандартах на конструктивные элементы швов.</p>
+    <dl class="gloss">
+      <dt>Разделка кромок</dt><dd>Форма подготовки торцов деталей под сварку — совокупность скосов, зазора и притупления.</dd>
+      <dt>Без скоса кромок</dt><dd>Прямой срез торца без разделки; применяется для тонкого металла и корневых проходов.</dd>
+      <dt>Скос одной кромки</dt><dd>Несимметричная разделка — скошена только одна из двух свариваемых кромок.</dd>
+      <dt>V-образная разделка</dt><dd>Скос кромок с одной стороны листа, сходящийся клином; сварка ведётся с одной стороны или с подваркой корня.</dd>
+      <dt>Х-образная разделка</dt><dd>Симметричные скосы с обеих сторон листа; уменьшает объём наплавленного металла и деформации при больших толщинах.</dd>
+      <dt>U-образная разделка</dt><dd>Криволинейный (чашеобразный) скос кромки; применяется для особо больших толщин ради экономии металла шва.</dd>
+      <dt>Зазор, b</dt><dd>Расстояние между свариваемыми кромками перед сваркой.</dd>
+      <dt>Притупление, с</dt><dd>Незаваренная часть кромки по толщине, оставляемая перед началом сварки корня шва.</dd>
+      <dt>Угол разделки, α</dt><dd>Суммарный угол раскрытия кромок (угол скоса ×2 для симметричной разделки).</dd>
+      <dt>Угол скоса кромки, β</dt><dd>Угол скоса одной кромки относительно её первоначальной плоскости.</dd>
+      <dt>Катет шва, k</dt><dd>Кратчайшее расстояние от поверхности одной детали до границы шва на другой детали — основной размер угловых, тавровых и нахлёсточных швов.</dd>
+      <dt>Остающаяся подкладка</dt><dd>Кольцо или пластина с обратной стороны шва, остающаяся в конструкции после сварки (характерно для ГОСТ 16037-80).</dd>
+      <dt>Подварка корня</dt><dd>Дополнительный проход с обратной стороны шва для проварки корня после основной сварки.</dd>
+    </dl>
+  </div>
+
+  <!-- 5264 -->
+  <div class="view" id="view-g5264">
+    <div class="sec-head"><span class="num">5264-80</span><h2>Ручная дуговая сварка — соединения сварные</h2><span class="line"></span></div>
+    <p class="sec-note">Основные типы, конструктивные элементы и размеры сварных соединений из сталей и сплавов на железоникелевой/никелевой основе, выполняемых ручной дуговой сваркой. Не распространяется на сварные соединения стальных трубопроводов (для них — ГОСТ 16037-80). Действует с Изменением №1 (1989) и Поправкой (2009).</p>
+    <div class="grid" data-group="5264"></div>
+  </div>
+
+  <!-- 14771 -->
+  <div class="view" id="view-g14771">
+    <div class="sec-head"><span class="num">14771-76</span><h2>Дуговая сварка в защитном газе — соединения сварные</h2><span class="line"></span></div>
+    <p class="sec-note">Распространяется на соединения из сталей и сплавов на железоникелевой/никелевой основе, выполняемые дуговой сваркой в защитном газе. Способы сварки обозначаются: <b style="color:var(--line)">ИН</b> — неплавящимся электродом в инертных газах без присадки, <b style="color:var(--line)">ИНп</b> — то же с присадочным металлом, <b style="color:var(--line)">ИП</b> — плавящимся электродом в инертных газах и их смесях с CO₂/O₂, <b style="color:var(--line)">УП</b> — плавящимся электродом в углекислом газе и его смесях с кислородом. При сварке в СО₂ проволокой 0,8–1,4 мм допускается использовать типы соединений по ГОСТ 5264-80. Действует с Изменениями №1–3.</p>
+    <div class="grid" data-group="14771"></div>
+  </div>
+
+  <!-- 16037 -->
+  <div class="view" id="view-g16037">
+    <div class="sec-head"><span class="num">16037-80</span><h2>Соединения сварные стальных трубопроводов</h2><span class="line"></span></div>
+    <p class="sec-note">Распространяется на сварные соединения труб между собой и с арматурой. Не распространяется на швы, применяемые при изготовлении самих труб из листа/полосы. Зазор между остающейся подкладкой и трубой: не более 0,2 мм — для соединений, контролируемых радиографически; не более 0,5 мм — для не контролируемых радиографически. Шероховатость обрабатываемых под сварку поверхностей — Rz ≤ 80 мкм. Действует с Изменением №1 (1990).</p>
+    <div class="grid" data-group="16037"></div>
+  </div>
+
+  <!-- 11534 -->
+  <div class="view" id="view-g11534">
+    <div class="sec-head"><span class="num">11534-75</span><h2>Соединения сварные под острыми и тупыми углами</h2><span class="line"></span></div>
+    <p class="sec-note">Ручная дуговая сварка плавящимся электродом конструкций из углеродистых и низколегированных сталей во всех пространственных положениях, толщина металла до 60 мм включительно, детали расположены под острым или тупым углом. Не распространяется на трубопроводы и швы, выполняемые сваркой с глубоким проплавлением. Для сварки в вертикальном, горизонтальном, потолочном положениях и на монтаже допускается увеличение предельных отклонений усиления и ширины шва: на 1 мм — при толщине до 26 мм, на 2 мм — при толщине свыше 26 мм. Действует с Изменением №1 (1991).</p>
+    <div class="grid" data-group="11534"></div>
+  </div>
+
+  <!-- 2.312 -->
+  <div class="view" id="view-g2312">
+    <div class="sec-head"><span class="num">2.312</span><h2>Условные изображения и обозначения швов на чертежах</h2><span class="line"></span></div>
+    <p class="sec-note">Порядок простановки обозначения шва на линии-выноске и состав полной записи. Приведено в объёме, устоявшемся в конструкторской практике.</p>
+
+    <div class="rule">
+      <div class="rsvg"><svg viewBox="0 0 220 100" width="220" height="100"><g stroke="var(--line)" stroke-width="2" fill="none"><path d="M20 70 L70 40 L140 40"/><path d="M65 44 l5 -8 l5 8" fill="var(--line)" stroke="none"/></g><text x="80" y="34" font-family="IBM Plex Mono, monospace" font-size="12" fill="#EAF2F7">ГОСТ 5264-80–С17</text></svg></div>
+      <div><h3>Шов виден со стороны стрелки (лицевая сторона)</h3><p>Полное обозначение шва пишут <b style="color:var(--accent)">над полкой</b> линии-выноски, стрелка которой направлена от изображения шва, видимого наблюдателю с данной стороны детали.</p></div>
+    </div>
+
+    <div class="rule">
+      <div class="rsvg"><svg viewBox="0 0 220 100" width="220" height="100"><g stroke="var(--line)" stroke-width="2" fill="none"><path d="M20 30 L70 60 L140 60"/><path d="M65 56 l5 8 l5 -8" fill="var(--line)" stroke="none"/></g><text x="80" y="80" font-family="IBM Plex Mono, monospace" font-size="12" fill="#EAF2F7">ГОСТ 5264-80–С17</text></svg></div>
+      <div><h3>Шов виден с обратной (нелицевой) стороны</h3><p>Обозначение пишут <b style="color:var(--accent)">под полкой</b> линии-выноски. Для одного и того же шва достаточно одной полной записи — с той стороны, откуда удобнее провести выноску.</p></div>
+    </div>
+
+    <div class="rule">
+      <div class="rsvg"><svg viewBox="0 0 220 100" width="220" height="100"><g stroke="var(--line)" stroke-width="2" fill="none"><circle cx="60" cy="50" r="7"/><path d="M67 50 L140 50"/></g></svg></div>
+      <div><h3>Шов по замкнутому контуру</h3><p>Окружность диаметром 3–4 мм у начала линии-выноски означает, что шов выполняется по всему замкнутому контуру детали.</p></div>
+    </div>
+
+    <div class="rule">
+      <div class="rsvg"><svg viewBox="0 0 220 100" width="220" height="100"><g stroke="var(--line)" stroke-width="2" fill="none"><path d="M30 70 l14 -22 l14 22 z"/><path d="M58 50 L140 50"/></g></svg></div>
+      <div><h3>Монтажный шов</h3><p>Флажок (треугольник) у начала линии-выноски означает шов, выполняемый при монтаже изделия — то есть не на заводе-изготовителе, а на месте установки.</p></div>
+    </div>
+
+    <div class="rule">
+      <div class="rsvg"><svg viewBox="0 0 220 100" width="220" height="100"><g stroke="var(--line)" stroke-width="2" fill="none"><path d="M40 60 L70 40 L120 40"/></g><path d="M62 40 L74 40 L68 30 Z" fill="var(--accent)" stroke="none"/><text x="82" y="55" font-family="IBM Plex Mono, monospace" font-size="12" fill="#EAF2F7">k 6</text></svg></div>
+      <div><h3>Катет углового / таврового / нахлёсточного шва</h3><p>Перед числовым значением катета ставится знак равнобедренного треугольника; далее в записи может следовать шаг и длина провариваемых участков для прерывистого шва (цепного или шахматного).</p></div>
+    </div>
+
+    <div class="rule">
+      <div class="rsvg"><svg viewBox="0 0 220 100" width="220" height="100"><g stroke="var(--line)" stroke-width="2"><path d="M20 50 L70 50 M85 50 L135 50 M150 50 L200 50" stroke-width="6"/></g><text x="70" y="75" font-family="IBM Plex Mono, monospace" font-size="11" fill="#8FA9BC">50 - 100</text></svg></div>
+      <div><h3>Прерывистый шов (цепной / шахматный)</h3><p>В записи после катета указывают длину провариваемого участка и шаг через знак «–» (напр. «50–100»); симметричное расположение участков на двух сторонах шва — цепной шов, вразбежку — шахматный (обозначается знаком «Z»).</p></div>
+    </div>
+
+    <div class="sec-head"><span class="num">04</span><h2>Состав полной записи обозначения шва</h2><span class="line"></span></div>
+    <p class="sec-note">Слева направо в строке обозначения указывают, при необходимости: вспомогательный знак монтажного шва → номер стандарта на типы и конструктивные элементы шва (напр. ГОСТ 5264-80) → буквенно-цифровой код типа шва по этому стандарту (напр. С17) → обозначение способа сварки, если оно не входит в код стандарта → знак и величину катета для угловых/тавровых/нахлёсточных швов → размеры провара/шага для прерывистого шва → вспомогательные знаки формы усиления и обработки шва → знак замкнутого контура.</p>
+  </div>
+
+  <div class="footnote">
+    <b>Важно.</b> Буквенно-цифровые коды типов швов и значения конструктивных элементов (зазор, притупление, углы разделки, размеры катета) в этом справочнике приведены как иллюстративные примеры устоявшейся практики и предназначены для быстрой ориентации, а не как замена самого стандарта. Перед простановкой обозначения на рабочем чертеже сверяйте точный номер типа и все размеры с действующим текстом соответствующего ГОСТ (с учётом внесённых изменений и поправок). Если пришлёте PDF/текст нужных таблиц — могу собрать точную числовую базу под конкретные толщины.
+  </div>
+
+</div>
+
+<script>
+const ICONS = {
+  buttFlat: `<svg viewBox="0 0 120 60" width="100%" height="56"><g stroke="var(--line)" stroke-width="2" fill="none"><rect x="8" y="18" width="46" height="24"/><rect x="66" y="18" width="46" height="24"/><path d="M54 18 L66 18" stroke="var(--accent)" stroke-width="3"/></g></svg>`,
+  buttV: `<svg viewBox="0 0 120 60" width="100%" height="56"><g stroke="var(--line)" stroke-width="2" fill="none"><path d="M8 18 H54 L60 42 L8 42 Z"/><path d="M112 18 H66 L60 42 L112 42 Z"/></g><path d="M54 20 L66 20 L60 40 Z" fill="var(--accent)" opacity=".5" stroke="none"/></svg>`,
+  buttX: `<svg viewBox="0 0 120 60" width="100%" height="56"><g stroke="var(--line)" stroke-width="2" fill="none"><path d="M8 8 H50 L60 30 L50 52 H8 Z"/><path d="M112 8 H70 L60 30 L70 52 H112 Z"/></g><path d="M50 10 L60 30 L50 50 M70 10 L60 30 L70 50" stroke="var(--accent)" opacity=".6"/></svg>`,
+  buttU: `<svg viewBox="0 0 120 60" width="100%" height="56"><g stroke="var(--line)" stroke-width="2" fill="none"><path d="M8 18 H46 C58 18 58 42 46 42 H8"/><path d="M112 18 H74 C62 18 62 42 74 42 H112"/></g></svg>`,
+  flange: `<svg viewBox="0 0 120 60" width="100%" height="56"><g stroke="var(--line)" stroke-width="2" fill="none"><path d="M10 42 L10 22 L26 10 M94 10 L110 22 L110 42"/><path d="M10 42 H110" stroke-dasharray="3 3"/></g></svg>`,
+  corner: `<svg viewBox="0 0 120 60" width="100%" height="56"><g stroke="var(--line)" stroke-width="2" fill="none"><path d="M14 50 L14 14 L58 14"/><path d="M58 14 L106 14 L106 50"/></g><path d="M58 14 L72 28 L58 28 Z" fill="var(--accent)" opacity=".5" stroke="none"/></svg>`,
+  tee: `<svg viewBox="0 0 120 60" width="100%" height="56"><g stroke="var(--line)" stroke-width="2" fill="none"><rect x="8" y="38" width="104" height="10"/><rect x="52" y="8" width="16" height="30"/></g><path d="M52 38 L40 48 L52 48 Z M68 38 L80 48 L68 48 Z" fill="var(--accent)" opacity=".5" stroke="none"/></svg>`,
+  lap: `<svg viewBox="0 0 120 60" width="100%" height="56"><g stroke="var(--line)" stroke-width="2" fill="none"><rect x="8" y="26" width="70" height="10"/><rect x="42" y="14" width="70" height="10"/></g><path d="M78 26 L88 36 L78 36 Z" fill="var(--accent)" opacity=".5" stroke="none"/></svg>`,
+  pipe: `<svg viewBox="0 0 120 60" width="100%" height="56"><g stroke="var(--line)" stroke-width="2" fill="none"><path d="M10 20 H50 M10 40 H50"/><path d="M50 20 L58 30 L50 40" /><path d="M70 20 L62 30 L70 40"/><path d="M70 20 H110 M70 40 H110"/></g></svg>`,
+  ring: `<svg viewBox="0 0 120 60" width="100%" height="56"><g stroke="var(--line)" stroke-width="2" fill="none"><path d="M10 22 H50 M10 38 H50 M70 22 H110 M70 38 H110"/><rect x="50" y="26" width="20" height="8" stroke="var(--accent)"/></g></svg>`,
+};
+
+const DATA = [
+  // ---------------- 5264-80 ----------------
+  {gost:'5264', code:'С1', group:'Стыковое', prep:'Без скоса кромок, шов односторонний', thickness:'1–4 мм', pos:'любое', icon:'buttFlat', verify:true},
+  {gost:'5264', code:'С2', group:'Стыковое', prep:'Без скоса кромок, шов двусторонний', thickness:'3–8 мм', pos:'любое', icon:'buttFlat', verify:true},
+  {gost:'5264', code:'С8', group:'Стыковое', prep:'Скос одной кромки', thickness:'3–26 мм', pos:'любое', icon:'buttV', verify:true},
+  {gost:'5264', code:'С12', group:'Стыковое', prep:'V-образная разделка (скос двух кромок)', thickness:'3–60 мм', pos:'любое', icon:'buttV', verify:true},
+  {gost:'5264', code:'С17', group:'Стыковое', prep:'Х-образная разделка (двусторонний скос)', thickness:'12–120 мм', pos:'нижнее', icon:'buttX', verify:true},
+  {gost:'5264', code:'С21', group:'Стыковое', prep:'U-образная (криволинейная) разделка', thickness:'20–100 мм', pos:'нижнее', icon:'buttU', verify:true},
+  {gost:'5264', code:'С25', group:'Стыковое', prep:'Двойная U-образная разделка, большие толщины', thickness:'≥60 мм', pos:'нижнее', icon:'buttU', verify:true},
+  {gost:'5264', code:'У4', group:'Угловое', prep:'Без скоса кромок', thickness:'2–40 мм', pos:'любое', icon:'corner', verify:true},
+  {gost:'5264', code:'У6', group:'Угловое', prep:'Скос одной кромки', thickness:'4–60 мм', pos:'любое', icon:'corner', verify:true},
+  {gost:'5264', code:'У8', group:'Угловое', prep:'Х-образная разделка', thickness:'12–60 мм', pos:'любое', icon:'corner', verify:true},
+  {gost:'5264', code:'Т1', group:'Тавровое', prep:'Без скоса кромок, шов односторонний', thickness:'2–40 мм', pos:'любое', icon:'tee', verify:true},
+  {gost:'5264', code:'Т3', group:'Тавровое', prep:'Без скоса кромок, шов двусторонний', thickness:'3–60 мм', pos:'любое', icon:'tee', verify:true},
+  {gost:'5264', code:'Т6', group:'Тавровое', prep:'Скос одной кромки', thickness:'4–60 мм', pos:'любое', icon:'tee', verify:true},
+  {gost:'5264', code:'Т9', group:'Тавровое', prep:'Двусторонний скос кромки, полный провар', thickness:'≥14 мм', pos:'любое', icon:'tee', verify:true},
+  {gost:'5264', code:'Н1', group:'Нахлёсточное', prep:'Без разделки, шов односторонний', thickness:'2–60 мм', pos:'любое', icon:'lap', verify:true},
+  {gost:'5264', code:'Н2', group:'Нахлёсточное', prep:'Без разделки, шов двусторонний', thickness:'2–60 мм', pos:'любое', icon:'lap', verify:true},
+
+  // ---------------- 14771-76 ----------------
+  {gost:'14771', code:'С1 (ИП/УП)', group:'Стыковое', prep:'Без скоса кромок, шов односторонний', thickness:'0,8–4 мм', pos:'любое', icon:'buttFlat', verify:true},
+  {gost:'14771', code:'С7 (ИНп)', group:'Стыковое', prep:'Отбортовка кромок, без присадки/с присадкой', thickness:'0,8–3 мм', pos:'любое', icon:'flange', verify:true},
+  {gost:'14771', code:'С12 (УП)', group:'Стыковое', prep:'V-образная разделка', thickness:'4–40 мм', pos:'любое', icon:'buttV', verify:true},
+  {gost:'14771', code:'С17 (ИП)', group:'Стыковое', prep:'Х-образная разделка', thickness:'20–60 мм', pos:'нижнее', icon:'buttX', verify:true},
+  {gost:'14771', code:'У4 (УП)', group:'Угловое', prep:'Без скоса кромок', thickness:'1,5–30 мм', pos:'любое', icon:'corner', verify:true},
+  {gost:'14771', code:'Т1 (УП)', group:'Тавровое', prep:'Без скоса кромок, шов односторонний', thickness:'1,5–30 мм', pos:'любое', icon:'tee', verify:true},
+  {gost:'14771', code:'Т3 (ИП/УП)', group:'Тавровое', prep:'Без скоса кромок, шов двусторонний', thickness:'2–40 мм', pos:'любое', icon:'tee', verify:true},
+  {gost:'14771', code:'Н1 (УП)', group:'Нахлёсточное', prep:'Без разделки, шов односторонний', thickness:'1–30 мм', pos:'любое', icon:'lap', verify:true},
+
+  // ---------------- 16037-80 ----------------
+  {gost:'16037', code:'С2', group:'Труба–труба', prep:'Без скоса кромок (стыковое, встык)', thickness:'до 6 мм', pos:'поворотное/неповоротное', icon:'pipe', verify:true},
+  {gost:'16037', code:'С17', group:'Труба–труба', prep:'V-образная разделка кромок', thickness:'4–40 мм', pos:'поворотное/неповоротное', icon:'buttV', verify:true},
+  {gost:'16037', code:'С23', group:'Труба–труба', prep:'На остающемся подкладном кольце', thickness:'3–20 мм', pos:'неповоротное', icon:'ring', verify:true},
+  {gost:'16037', code:'У…', group:'Труба–арматура', prep:'Соединение встык с деталью арматуры (фланец, отвод, тройник)', thickness:'по толщине стенки трубы', pos:'любое', icon:'flange', verify:true},
+  {gost:'16037', code:'Н1', group:'Труба–муфта', prep:'Соединение враструб / муфтовое, угловой шов', thickness:'≤10 мм', pos:'любое', icon:'lap', verify:true},
+
+  // ---------------- 11534-75 ----------------
+  {gost:'11534', code:'СО1', group:'Стыковое (острый угол)', prep:'Без скоса кромок', thickness:'2–10 мм', pos:'все, вкл. монтаж', icon:'corner', verify:true},
+  {gost:'11534', code:'СО8', group:'Стыковое (острый угол)', prep:'Скос одной кромки', thickness:'4–40 мм', pos:'все, вкл. монтаж', icon:'corner', verify:true},
+  {gost:'11534', code:'СТ4', group:'Стыковое (тупой угол)', prep:'Без скоса кромок', thickness:'2–20 мм', pos:'все, вкл. монтаж', icon:'corner', verify:true},
+  {gost:'11534', code:'СТ12', group:'Стыковое (тупой угол)', prep:'V-образная разделка', thickness:'6–60 мм', pos:'все, вкл. монтаж', icon:'buttV', verify:true},
+];
+
+function renderCard(d){
+  return `<div class="card" data-search="${(d.code+' '+d.group+' '+d.prep+' '+d.thickness+' '+d.pos).toLowerCase()}">
+    <div class="code-row"><span class="code">${d.code}</span><span class="badge">${d.group}</span></div>
+    <div class="icon">${ICONS[d.icon]||''}</div>
+    <p class="prep">${d.prep}</p>
+    <div class="meta">
+      <span>толщина <b>${d.thickness}</b></span>
+      <span>положение <b>${d.pos}</b></span>
+    </div>
+    ${d.verify?'<div class="verify">пример обозначения — точный номер типа и размеры сверяйте с текстом ГОСТ</div>':''}
+  </div>`;
+}
+
+['5264','14771','16037','11534'].forEach(g=>{
+  const el = document.querySelector(`.grid[data-group="${g}"]`);
+  if(el){ el.innerHTML = DATA.filter(d=>d.gost===g).map(renderCard).join(''); }
+});
+
+// Tabs
+document.querySelectorAll('.tab').forEach(tab=>{
+  tab.addEventListener('click', ()=>{
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+    document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('view-'+tab.dataset.view).classList.add('active');
+  });
+});
+
+// Search across all cards + glossary + tabs auto-switch to first match group
+const search = document.getElementById('search');
+const count = document.getElementById('count');
+search.addEventListener('input', ()=>{
+  const q = search.value.trim().toLowerCase();
+  let visible = 0;
+  document.querySelectorAll('.card[data-search]').forEach(c=>{
+    const match = !q || c.dataset.search.includes(q);
+    c.style.display = match ? '' : 'none';
+    if(match) visible++;
+  });
+  count.textContent = q ? `${visible} совпад.` : '';
+  if(q){
+    // reveal all gost tabs' content areas so filtered cards are visible regardless of active tab
+    document.querySelectorAll('.view').forEach(v=>{
+      if(v.querySelector('.grid')) v.style.display = 'block';
+    });
+  } else {
+    document.querySelectorAll('.view').forEach(v=>{
+      if(v.querySelector('.grid')) v.style.display = '';
+    });
+    document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+    document.querySelector('.tab.active') && document.getElementById('view-'+document.querySelector('.tab.active').dataset.view).classList.add('active');
+  }
+});
+</script>
+</body>
+</html>
