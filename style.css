@@ -1,4 +1,3 @@
-/* Общие переменные и стили оформления */
 :root {
   --bg-color: #0f172a;
   --card-bg: #1e293b;
@@ -8,8 +7,6 @@
   --accent-color: #f59e0b;
   --text-main: #f8fafc;
   --text-muted: #94a3b8;
-  --steel-color: #64748b;
-  --weld-color: #f97316;
   --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
@@ -90,7 +87,7 @@ body {
   padding-bottom: 10px;
 }
 
-/* Элементы формы */
+/* Форма поиска */
 .form-group {
   margin-bottom: 20px;
 }
@@ -148,7 +145,6 @@ select {
   gap: 8px;
   max-height: 280px;
   overflow-y: auto;
-  padding-right: 4px;
 }
 
 .joint-chip {
@@ -174,7 +170,7 @@ select {
   border-color: var(--primary-color);
 }
 
-/* Карточка деталей */
+/* Правая панель информации */
 .detail-header {
   display: flex;
   justify-content: space-between;
@@ -243,7 +239,7 @@ select {
   border-color: var(--primary-color);
 }
 
-/* Схема SVG */
+/* Контейнер чертежа */
 .scheme-container {
   background-color: #0f172a;
   border: 1px solid var(--card-border);
@@ -264,7 +260,7 @@ select {
   height: auto;
 }
 
-/* Грид параметров */
+/* Параметры */
 .params-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
@@ -308,7 +304,6 @@ select {
   margin-bottom: 4px;
 }
 
-/* Пустое состояние */
 .empty-state {
   text-align: center;
   padding: 40px;
