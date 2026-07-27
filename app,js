@@ -1,1 +1,20 @@
-
+const gost5264 = [
+  {
+    code: "С1",
+    name: "Стыковое без скоса кромок",
+    thicknessMin: 1,
+    thicknessMax: 4,
+    gap: "0 - 1.5 мм",
+    bevelAngle: 0,
+    description: "Одностороннее соединение для тонкого листового металла."
+  },
+  {
+    code: "С8",
+    name: "Стыковое с V-образным скосом",
+    thicknessMin: 3,
+    thicknessMax: 60,
+    gap: "1 - 3 мм",
+    bevelAngle: 60,
+    description: "Односторонний шов. Требует подварки корня при толщине от 5 мм."
+  }
+];
