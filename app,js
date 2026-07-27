@@ -132,33 +132,153 @@ const weldDatabase = [
   }
 ];
 
-// DOM-элементы
-const thicknessRange = document.getElementById('thicknessRange');
-const thicknessInput = document.getElementById('thicknessInput');
-const jointTypeSelect = document.getElementById('jointTypeSelect');
-const jointsList = document.getElementById('jointsList');
-const matchCount = document.getElementById('matchCount');
+// Функция безопасной инициализации
+function initApp() {
+  const thicknessRange = document.getElementById('thicknessRange');
+  const thicknessInput = document.getElementById('thicknessInput');
+  const jointTypeSelect = document.getElementById('jointTypeSelect');
+  const jointsList = document.getElementById('jointsList');
+  const matchCount = document.getElementById('matchCount');
 
-const weldDetails = document.getElementById('weldDetails');
-const emptyState = document.getElementById('emptyState');
-const weldCodeBadge = document.getElementById('weldCodeBadge');
-const weldName = document.getElementById('weldName');
-const eskdCode = document.getElementById('eskdCode');
-const copyBtn = document.getElementById('copyBtn');
+  const weldDetails = document.getElementById('weldDetails');
+  const emptyState = document.getElementById('emptyState');
+  const weldCodeBadge = document.getElementById('weldCodeBadge');
+  const weldName = document.getElementById('weldName');
+  const eskdCode = document.getElementById('eskdCode');
+  const copyBtn = document.getElementById('copyBtn');
 
-const paramS = document.getElementById('paramS');
-const paramB = document.getElementById('paramB');
-const paramAlpha = document.getElementById('paramAlpha');
-const paramC = document.getElementById('paramC');
-const weldDesc = document.getElementById('weldDesc');
-const svgContainer = document.getElementById('svgContainer');
+  const paramS = document.getElementById('paramS');
+  const paramB = document.getElementById('paramB');
+  const paramAlpha = document.getElementById('paramAlpha');
+  const paramC = document.getElementById('paramC');
+  const weldDesc = document.getElementById('weldDesc');
+  const svgContainer = document.getElementById('svgContainer');
 
-let selectedWeld = null;
+  let selectedWeld = null;
 
-// Инициализация
-document.addEventListener('DOMContentLoaded', () => {
-  updateSearch();
+  if (!thicknessInput || !jointsList) {
+    console.error("Ошибка: элементы формы не найдены в DOM!");
+    return;
+  }
 
+  function updateSearch() {
+    const currentS = parseFloat(thicknessInput.value) || 1;
+    const currentGroup = jointTypeSelect.value;
+
+    const matches = weldDatabase.filter(weld => {
+      const isThicknessOk = currentS >= weld.sMin && currentS <= weld.sMax;
+      const isGroupOk = currentGroup === 'ALL' || weld.group === currentGroup;
+      return isThicknessOk && isGroupOk;
+    });
+
+    matchCount.textContent = matches.length;
+    jointsList.innerHTML = '';
+
+    if (matches.length === 0) {
+      jointsList.innerHTML = '<span style="color: var(--text-muted); font-size: 0.85rem;">Нет подходящих швов</span>';
+      weldDetails.classList.add('hidden');
+      emptyState.classList.remove('hidden');
+      return;
+    }
+
+    emptyState.classList.add('hidden');
+    weldDetails.classList.remove('hidden');
+
+    matches.forEach(weld => {
+      const chip = document.createElement('button');
+      chip.className = `joint-chip ${selectedWeld && selectedWeld.code === weld.code ? 'active' : ''}`;
+      chip.textContent = `${weld.code}`;
+      chip.title = weld.name;
+      chip.addEventListener('click', () => selectWeld(weld));
+      jointsList.appendChild(chip);
+    });
+
+    if (!selectedWeld || !matches.some(m => m.code === selectedWeld.code)) {
+      selectWeld(matches[0]);
+    } else {
+      selectWeld(selectedWeld);
+    }
+  }
+
+  function selectWeld(weld) {
+    selectedWeld = weld;
+
+    document.querySelectorAll('.joint-chip').forEach(chip => {
+      chip.classList.toggle('active', chip.textContent === weld.code);
+    });
+
+    weldCodeBadge.textContent = weld.code;
+    weldName.textContent = weld.name;
+    eskdCode.textContent = `ГОСТ 5264-80-${weld.code}`;
+
+    paramS.textContent = `${weld.sMin} – ${weld.sMax} мм`;
+    paramB.textContent = weld.b;
+    paramAlpha.textContent = weld.alpha;
+    paramC.textContent = weld.c;
+    weldDesc.textContent = weld.desc;
+
+    renderSVG(weld);
+  }
+
+  function renderSVG(weld) {
+    let svgContent = '';
+    const width = 340;
+    const height = 160;
+
+    switch (weld.drawType) {
+      case 'C1':
+      case 'C2':
+        svgContent = `
+          <svg width="${width}" height="${height}" viewBox="0 0 340 160">
+            <rect x="30" y="50" width="125" height="60" fill="#475569" stroke="#94a3b8" stroke-width="2"/>
+            <rect x="185" y="50" width="125" height="60" fill="#475569" stroke="#94a3b8" stroke-width="2"/>
+            <path d="M 155,50 Q 170,42 185,50 L 185,110 ${weld.drawType==='C2' ? 'Q 170,118 155,110' : 'L 155,110'} Z" fill="#f97316" opacity="0.85"/>
+            <line x1="155" y1="35" x2="185" y2="35" stroke="#38bdf8" stroke-width="1.5"/>
+            <text x="170" y="28" fill="#38bdf8" font-size="12" text-anchor="middle">b</text>
+            <text x="15" y="85" fill="#38bdf8" font-size="12" text-anchor="middle">S</text>
+          </svg>
+        `;
+        break;
+
+      case 'C8':
+        svgContent = `
+          <svg width="${width}" height="${height}" viewBox="0 0 340 160">
+            <path d="M 30,50 L 140,50 L 155,95 L 155,110 L 30,110 Z" fill="#475569" stroke="#94a3b8" stroke-width="2"/>
+            <path d="M 310,50 L 200,50 L 185,95 L 185,110 L 310,110 Z" fill="#475569" stroke="#94a3b8" stroke-width="2"/>
+            <path d="M 140,50 Q 170,40 200,50 L 185,95 L 185,110 Q 170,116 155,110 L 155,95 Z" fill="#f97316" opacity="0.85"/>
+            <path d="M 145,65 A 30 30 0 0 0 195 65" fill="none" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="3,3"/>
+            <text x="170" y="80" fill="#f59e0b" font-size="12" text-anchor="middle">α</text>
+            <text x="170" y="140" fill="#38bdf8" font-size="12" text-anchor="middle">b</text>
+          </svg>
+        `;
+        break;
+
+      case 'T1':
+      case 'T3':
+        svgContent = `
+          <svg width="${width}" height="${height}" viewBox="0 0 340 160">
+            <rect x="40" y="100" width="260" height="40" fill="#475569" stroke="#94a3b8" stroke-width="2"/>
+            <rect x="145" y="20" width="50" height="80" fill="#475569" stroke="#94a3b8" stroke-width="2"/>
+            <path d="M 195,100 L 215,100 Q 198,80 195,75 Z" fill="#f97316" opacity="0.85"/>
+            ${weld.drawType === 'T3' ? '<path d="M 145,100 L 125,100 Q 142,80 145,75 Z" fill="#f97316" opacity="0.85"/>' : ''}
+            <text x="218" y="85" fill="#38bdf8" font-size="12">k</text>
+          </svg>
+        `;
+        break;
+
+      default:
+        svgContent = `
+          <svg width="${width}" height="${height}" viewBox="0 0 340 160">
+            <rect x="50" y="40" width="240" height="80" rx="8" fill="#334155" stroke="#94a3b8" stroke-width="2"/>
+            <text x="170" y="85" fill="#f8fafc" font-size="14" text-anchor="middle">Схема соединения ${weld.code}</text>
+          </svg>
+        `;
+    }
+
+    svgContainer.innerHTML = svgContent;
+  }
+
+  // Привязка событий
   thicknessRange.addEventListener('input', (e) => {
     thicknessInput.value = e.target.value;
     updateSearch();
@@ -177,123 +297,14 @@ document.addEventListener('DOMContentLoaded', () => {
     copyBtn.textContent = '✅ Скопировано!';
     setTimeout(() => { copyBtn.textContent = originalText; }, 1500);
   });
-});
 
-// Поиск и обновление интерфейса
-function updateSearch() {
-  const currentS = parseFloat(thicknessInput.value) || 1;
-  const currentGroup = jointTypeSelect.value;
-
-  const matches = weldDatabase.filter(weld => {
-    const isThicknessOk = currentS >= weld.sMin && currentS <= weld.sMax;
-    const isGroupOk = currentGroup === 'ALL' || weld.group === currentGroup;
-    return isThicknessOk && isGroupOk;
-  });
-
-  matchCount.textContent = matches.length;
-  jointsList.innerHTML = '';
-
-  if (matches.length === 0) {
-    jointsList.innerHTML = '<span style="color: var(--text-muted); font-size: 0.85rem;">Нет подходящих швов</span>';
-    weldDetails.classList.add('hidden');
-    emptyState.classList.remove('hidden');
-    return;
-  }
-
-  emptyState.classList.add('hidden');
-  weldDetails.classList.remove('hidden');
-
-  matches.forEach(weld => {
-    const chip = document.createElement('button');
-    chip.className = `joint-chip ${selectedWeld && selectedWeld.code === weld.code ? 'active' : ''}`;
-    chip.textContent = `${weld.code}`;
-    chip.title = weld.name;
-    chip.addEventListener('click', () => selectWeld(weld));
-    jointsList.appendChild(chip);
-  });
-
-  if (!selectedWeld || !matches.some(m => m.code === selectedWeld.code)) {
-    selectWeld(matches[0]);
-  } else {
-    selectWeld(selectedWeld);
-  }
+  // Запуск первого поиска
+  updateSearch();
 }
 
-function selectWeld(weld) {
-  selectedWeld = weld;
-
-  document.querySelectorAll('.joint-chip').forEach(chip => {
-    chip.classList.toggle('active', chip.textContent === weld.code);
-  });
-
-  weldCodeBadge.textContent = weld.code;
-  weldName.textContent = weld.name;
-  eskdCode.textContent = `ГОСТ 5264-80-${weld.code}`;
-
-  paramS.textContent = `${weld.sMin} – ${weld.sMax} мм`;
-  paramB.textContent = weld.b;
-  paramAlpha.textContent = weld.alpha;
-  paramC.textContent = weld.c;
-  weldDesc.textContent = weld.desc;
-
-  renderSVG(weld);
-}
-
-// Генератор чертежа в SVG
-function renderSVG(weld) {
-  let svgContent = '';
-  const width = 340;
-  const height = 160;
-
-  switch (weld.drawType) {
-    case 'C1':
-    case 'C2':
-      svgContent = `
-        <svg width="${width}" height="${height}" viewBox="0 0 340 160">
-          <rect x="30" y="50" width="125" height="60" fill="#475569" stroke="#94a3b8" stroke-width="2"/>
-          <rect x="185" y="50" width="125" height="60" fill="#475569" stroke="#94a3b8" stroke-width="2"/>
-          <path d="M 155,50 Q 170,42 185,50 L 185,110 ${weld.drawType==='C2' ? 'Q 170,118 155,110' : 'L 155,110'} Z" fill="#f97316" opacity="0.85"/>
-          <line x1="155" y1="35" x2="185" y2="35" stroke="#38bdf8" stroke-width="1.5"/>
-          <text x="170" y="28" fill="#38bdf8" font-size="12" text-anchor="middle">b</text>
-          <text x="15" y="85" fill="#38bdf8" font-size="12" text-anchor="middle">S</text>
-        </svg>
-      `;
-      break;
-
-    case 'C8':
-      svgContent = `
-        <svg width="${width}" height="${height}" viewBox="0 0 340 160">
-          <path d="M 30,50 L 140,50 L 155,95 L 155,110 L 30,110 Z" fill="#475569" stroke="#94a3b8" stroke-width="2"/>
-          <path d="M 310,50 L 200,50 L 185,95 L 185,110 L 310,110 Z" fill="#475569" stroke="#94a3b8" stroke-width="2"/>
-          <path d="M 140,50 Q 170,40 200,50 L 185,95 L 185,110 Q 170,116 155,110 L 155,95 Z" fill="#f97316" opacity="0.85"/>
-          <path d="M 145,65 A 30 30 0 0 0 195 65" fill="none" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="3,3"/>
-          <text x="170" y="80" fill="#f59e0b" font-size="12" text-anchor="middle">α</text>
-          <text x="170" y="140" fill="#38bdf8" font-size="12" text-anchor="middle">b</text>
-        </svg>
-      `;
-      break;
-
-    case 'T1':
-    case 'T3':
-      svgContent = `
-        <svg width="${width}" height="${height}" viewBox="0 0 340 160">
-          <rect x="40" y="100" width="260" height="40" fill="#475569" stroke="#94a3b8" stroke-width="2"/>
-          <rect x="145" y="20" width="50" height="80" fill="#475569" stroke="#94a3b8" stroke-width="2"/>
-          <path d="M 195,100 L 215,100 Q 198,80 195,75 Z" fill="#f97316" opacity="0.85"/>
-          ${weld.drawType === 'T3' ? '<path d="M 145,100 L 125,100 Q 142,80 145,75 Z" fill="#f97316" opacity="0.85"/>' : ''}
-          <text x="218" y="85" fill="#38bdf8" font-size="12">k</text>
-        </svg>
-      `;
-      break;
-
-    default:
-      svgContent = `
-        <svg width="${width}" height="${height}" viewBox="0 0 340 160">
-          <rect x="50" y="40" width="240" height="80" rx="8" fill="#334155" stroke="#94a3b8" stroke-width="2"/>
-          <text x="170" y="85" fill="#f8fafc" font-size="14" text-anchor="middle">Схема соединения ${weld.code}</text>
-        </svg>
-      `;
-  }
-
-  svgContainer.innerHTML = svgContent;
+// Запуск кода без риска пропустить DOMContentLoaded
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initApp);
+} else {
+  initApp();
 }
